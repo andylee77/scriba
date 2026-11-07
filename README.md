@@ -190,6 +190,59 @@ scriba -E 93c46 -r eeprom.bin
 scriba -E 24c32 -w eeprom.bin
 ```
 
+## CH347 test results
+
+Tested with the web version (Chrome, Windows 11) on a CH347T programmer
+board ("CH347 V1.0", firmware 0544, SPI interface bound to WinUSB with
+Zadig) and a ZB25VQ128 (16 MB SPI NOR, ID `5E 40 18`) on a SOIC clip.
+
+| Operation, 16 MB | Time |
+|---|---|
+| Read at 15 MHz | 11.3–11.9 s |
+| Read at 60 MHz | 7.2 s |
+| Chip erase | 29–32 s (set by the chip) |
+| Verify read at 60 MHz | 7.4 s |
+
+Reads at 15 and 60 MHz were byte-identical (SHA-256) to a dump of the same
+chip made with a CH341A.
+
+16 MB writes at 60 MHz, after the chip erase, as each optimization landed:
+
+| Driver | Image | Write time |
+|---|---|---|
+| Held writes, `0xC2` status polls, status polled at once | full-flash dump | 2 min 42 s |
+| + chip-select flags (firmware 0341+) | Wyze Pan v3 recovery image | 1 min 26 s |
+| + blank-page skip | same recovery image | 46 s |
+
+The recovery image holds 7.3 MB of data: 29,881 of its 65,536 pages are
+programmed and 35,655 blank ones are skipped. The log of that run:
+
+```text
+17:31:21.922  Found programmer device: WinChipHead (WCH) - CH347T
+17:31:21.931  CH347 SPI clock: 15 MHz
+17:31:21.932  CH347 firmware version: 0544
+17:31:21.932  CH347 chip-select flags: on
+17:31:21.935  Detected: NOR: ZB25VQ128 (16.0 MB)
+17:31:25.424  CH347 SPI clock: 60 MHz
+17:31:33.226  Firmware loaded: recovery_wyzepan3.bin (16.00 MB)
+17:31:33.234  Image: data in 137 ranges from 0x000000 to 0xFF00FF (7.3 MB in 29881 of 65536 pages); last data byte at 0xFF000B, then 64.0 KB of blank (0xFF) tail
+17:31:43.220  Erasing flash (16.0 MB)...
+17:32:14.945  Erase complete
+17:32:14.951  Writing recovery_wyzepan3.bin (16.0 MB): programming 29881 pages, skipping 35655 blank (0xFF) pages...
+17:32:23.041  Written 10% (1.6 MB / 16.0 MB)
+17:32:31.712  Written 20% (3.3 MB / 16.0 MB)
+17:32:41.109  Written 30% (4.8 MB / 16.0 MB)
+17:32:50.938  Written 40% (6.4 MB / 16.0 MB)
+17:32:58.804  Written 50% (8.0 MB / 16.0 MB)
+17:32:59.219  Written 60% (9.6 MB / 16.0 MB)
+17:32:59.620  Written 70% (11.3 MB / 16.0 MB)
+17:33:00.009  Written 80% (12.8 MB / 16.0 MB)
+17:33:00.420  Written 90% (14.4 MB / 16.0 MB)
+17:33:00.820  Written 100% (16.0 MB / 16.0 MB)
+17:33:00.830  Write complete
+17:33:08.037  Verify: OK - data matches
+```
+
 ---
 
 Scriba began as a streamlined fork of [SNANDer](https://github.com/McMCCRU/SNANDer)

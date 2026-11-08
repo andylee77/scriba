@@ -91,7 +91,13 @@ def main():
                             b"mtdparts=${mtdparts} mtdparts=x:1(a)\0")
     write(outdir, "weird_mtd.bin", bytes(weird))
     write(outdir, "camera_4mb.bin", camera_flash())
-    print("wrote 6 images to", outdir)
+    # sizes that wrap start + size, or overflow a unit multiplier
+    hostile = bytearray(b"\xff" * 8192)
+    spec = (b"mtdparts=x:0x1000(a),18446744073709551615(b) "
+            b"mtdparts=y:4k(a),18014398509481983k(b),-(c)\0")
+    hostile[0:len(spec)] = spec
+    write(outdir, "hostile_mtd.bin", bytes(hostile))
+    print("wrote 7 images to", outdir)
 
 
 if __name__ == "__main__":

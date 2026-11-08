@@ -22,7 +22,7 @@ libusb-1.0 headers) and runs:
   line says whether all checks passed.
 - `layout/layout_cli.c` and `layout/layout_json.c`: `src/flash_layout.c` on
   the images from `layout/make_test_images.py` (empty, tiny, blank, random,
-  odd `mtdparts` strings, and a 4 MB camera-style flash with an Ingenic boot
+  odd and overflowing `mtdparts` strings, and a 4 MB camera-style flash with an Ingenic boot
   header, a CRC-checked U-Boot env, a uImage, squashfs and empty JFFS2). The
   JSON driver also tries every output buffer size. Pass your own dumps as
   arguments to include them.
